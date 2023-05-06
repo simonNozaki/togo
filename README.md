@@ -9,3 +9,26 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/json/cords-5647f-firebase-admins
 ```
 
 参考: [Google 以外の環境で SDK を初期化する](https://firebase.google.com/docs/admin/setup?hl=ja#initialize_the_sdk_in_non-google_environments)
+
+### ローカル開発
+**todo**
+
+登録 `POST /todo`
+
+```json
+{
+    "id": "3",
+    "userId": "1",
+    "title": "task",
+    "description": "from postman",
+    "state": "unprocessed",
+    "createdAt": "2023-05-06",
+    "createdBy": "postman",
+    "updatedAt": "2023-05-06",
+    "updatedBy": "postman"
+}
+```
+
+1件取得 `GET /todo/:id`
+
+全県取得 `GET /todo`
