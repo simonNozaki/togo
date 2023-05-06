@@ -15,6 +15,7 @@ var ctx = context.Background()
 type TodoRepository interface {
 	All() (*[]data.Todo, error)
 	FindById(id string) (*data.Todo, error)
+	Save(req data.Todo) error
 }
 
 type DefaultTodoRepository struct {
@@ -30,7 +31,7 @@ func (repository DefaultTodoRepository) All() (*[]data.Todo, error) {
 			break
 		}
 		if err != nil {
-			// TODO エラー処理
+			return nil, err
 		}
 
 		v, err := docToTodo(doc.Data())
@@ -52,7 +53,7 @@ func (repository DefaultTodoRepository) FindById(id string) (*data.Todo, error) 
 			break
 		}
 		if err != nil {
-			// TODO エラー処理
+			return nil, err
 		}
 
 		v, err := docToTodo(doc.Data())
@@ -64,13 +65,34 @@ func (repository DefaultTodoRepository) FindById(id string) (*data.Todo, error) 
 	return &result[0], nil
 }
 
+func (repository DefaultTodoRepository) Save(req data.Todo) error {
+	_, _, err := repository.Client.Collection("todos").Add(ctx, todoToMap(req))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func todoToMap(todo data.Todo) map[string]interface{} {
+	var v = make(map[string]interface{})
+	v["id"] = todo.Id
+	v["userId"] = todo.UserId
+	v["title"] = todo.Title
+	v["state"] = todo.State.String()
+	v["description"] = todo.Description
+	v["createdAt"] = todo.CreatedAt.Format("2006-01-02")
+	v["createdBy"] = todo.CreatedBy
+	v["updatedAt"] = todo.UpdatedAt.Format("2006-01-02")
+	v["updatedBy"] = todo.UpdatedBy
+	return v
+}
+
 func docToTodo(doc map[string]interface{}) (*data.Todo, error) {
 	createdAt, err := time.Parse("2006-01-02", doc["createdAt"].(string))
 	updatedAt, err := time.Parse("2006-01-02", doc["updatedAt"].(string))
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("updateAtがパースできません: %s", err))
 	}
-	fmt.Println(doc)
 	return &data.Todo{
 		Id:          doc["id"].(string),
 		UserId:      doc["userId"].(string),
@@ -78,6 +100,8 @@ func docToTodo(doc map[string]interface{}) (*data.Todo, error) {
 		Description: doc["description"].(string),
 		State:       data.GetState(doc["state"].(string)),
 		CreatedAt:   createdAt,
-		UpdateAt:    updatedAt,
+		CreatedBy:   doc["createdBy"].(string),
+		UpdatedAt:   updatedAt,
+		UpdatedBy:   doc["updatedBy"].(string),
 	}, nil
 }

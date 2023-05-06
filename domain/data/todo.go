@@ -48,5 +48,7 @@ type Todo struct {
 	Description string `json:"description"`
 	State       `json:"state"`
 	CreatedAt   time.Time `json:"createdAt"`
-	UpdateAt    time.Time `json:"updateAt"`
+	CreatedBy   string    `json:"createdBy"`
+	UpdatedAt   time.Time `json:"updateAt"`
+	UpdatedBy   string    `json:"updatedBy"`
 }
